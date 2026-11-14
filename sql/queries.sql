@@ -1,10 +1,85 @@
+--------------------------------------------------------------------------------------------------
 -- Q01: Quais são os quartos disponíveis (não reservados) para um determinado intervalo de datas?
+--------------------------------------------------------------------------------------------------
+SELECT
+    h.nome_hotel,
+    q.id_quarto,
+    q.num_quarto,
+    q.piso,
+    tq.nome_tipo,
+    tq.capacidade_maxima,
+    tq.preco_noite,
+    q.estado_manutencao
+FROM quarto q
+JOIN hotel h ON h.id_hotel = q.id_hotel
+JOIN tipo_quarto tq ON tq.id_tipo_quarto = q.id_tipo_quarto
+WHERE q.estado_manutencao <> 'em_manutencao'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM reserva_quarto rq
+      JOIN reserva r ON r.id_reserva = rq.id_reserva
+      WHERE rq.id_quarto = q.id_quarto
+        AND r.estado_reserva <> 'cancelada'
+        AND r.data_checkin < CURRENT_DATE + 3
+        AND r.data_checkout > CURRENT_DATE
+  )
+ORDER BY h.nome_hotel, q.num_quarto;
 
+-----------------------------------------------------------------------------
 -- Q02: Qual é o histórico de reservas efetuadas por um determinado cliente?
+-----------------------------------------------------------------------------
+SELECT
+    c.nome AS cliente,
+    r.id_reserva,
+    rq.nome_hotel,
+    rq.quartos,
+    r.data_criacao,
+    r.data_checkin,
+    r.data_checkout,
+    r.data_checkout - r.data_checkin AS num_noites,
+    r.num_hospedes,
+    r.estado_reserva,
+    (r.data_checkout - r.data_checkin) * rq.tarifa_diaria
+        + COALESCE((SELECT SUM(rs.quantidade * rs.preco_aplicado) -- Devolve o primeiro valor não nulo
+                    FROM reserva_servico rs
+                    WHERE rs.id_reserva = r.id_reserva), 0) AS valor_total_estadia,
+    COALESCE((SELECT SUM(p.valor_prestacao) -- Devolve o primeiro valor não nulo 
+              FROM pagamento p
+              WHERE p.id_reserva = r.id_reserva
+                AND p.estado_pagamento = 'pago'), 0) AS total_pago
+FROM cliente c
+JOIN reserva r ON r.id_cliente = c.id_cliente
+CROSS JOIN LATERAL (
+    SELECT
+        MIN(h.nome_hotel) AS nome_hotel,
+        STRING_AGG(DISTINCT q.num_quarto, ', ' ORDER BY q.num_quarto) AS quartos,
+        SUM(tq.preco_noite) AS tarifa_diaria
+    FROM reserva_quarto x
+    JOIN quarto q ON q.id_quarto = x.id_quarto
+    JOIN hotel h ON h.id_hotel = q.id_hotel
+    JOIN tipo_quarto tq ON tq.id_tipo_quarto = q.id_tipo_quarto
+    WHERE x.id_reserva = r.id_reserva
+) rq
+WHERE c.nif = '245678901' -- NIF exemplo
+ORDER BY r.data_checkin DESC;
 
+-------------------------------------------------------------------------------------------------
 -- Q03: Qual é o valor total de faturação acumulado por método de pagamento num determinado mês?
+-------------------------------------------------------------------------------------------------
+SELECT
+    metodo_pagamento,
+    COUNT(*) AS num_pagamentos,
+    SUM(valor_prestacao) AS total_faturado
+FROM pagamento
+WHERE estado_pagamento = 'pago'
+  AND data_pagamento >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')
+  AND data_pagamento <  DATE_TRUNC('month', CURRENT_DATE)
+GROUP BY metodo_pagamento
+ORDER BY total_faturado DESC;
 
+-----------------------------------------------------------------
 -- Q04: Em quantas reservas foi incluído cada serviço adicional? 
+-----------------------------------------------------------------
 SELECT s.id_servico, s.nome_servico, COUNT(DISTINCT rs.id_reserva) AS total_reservas, -- nao conta as reservas repetidas
 COALESCE(SUM(rs.quantidade), 0) AS total_unidades_consumidas -- passa as reservas a null para 0 para a contagem
 FROM servico s
@@ -27,10 +102,7 @@ ROUND(
     COALESCE(SUM(
             GREATEST(0,
                 LEAST(r.data_checkout, p.data_fim + 1) - GREATEST(r.data_checkin, p.data_inicio) -- (noites ocupadas / capacidade total de noites no período) * 100
-            )
-        ), 0)::NUMERIC
-        / NULLIF(COUNT(DISTINCT q.id_quarto) * (p.data_fim - p.data_inicio + 1), 0) * 100,
-    2) AS taxa_ocupacao
+            ) ), 0)::NUMERIC / NULLIF(COUNT(DISTINCT q.id_quarto) * (p.data_fim - p.data_inicio + 1), 0) * 100, 2) AS taxa_ocupacao
 FROM tipo_quarto tq
 CROSS JOIN periodo p
 LEFT JOIN quarto q ON tq.id_tipo_quarto = q.id_tipo_quarto
@@ -42,8 +114,9 @@ LEFT JOIN reserva r ON rq.id_reserva = r.id_reserva -- filtra apenas reservas co
 GROUP BY tq.id_tipo_quarto, tq.nome_tipo_quarto, p.data_inicio, p.data_fim
 ORDER BY taxa_ocupacao DESC, tq.nome_tipo_quarto;
 
-
+---------------------------------------------------------------------------------------------
 -- Q06: Quais são as reservas pendentes de pagamento cuja data de check-in é no próprio dia?
+---------------------------------------------------------------------------------------------
 SELECT
     r.id_reserva,
     c.nome AS nome_cliente,
@@ -70,7 +143,9 @@ WHERE r.data_checkin = CURRENT_DATE
 GROUP BY r.id_reserva, c.nome, c.telemovel, c.email, r.data_checkin, r.data_checkout, r.estado_reserva
 ORDER BY r.data_checkin;
 
+---------------------------------------------------------------------
 -- Q07: Qual hotel da cadeia teve maior receita total no último mês?
+---------------------------------------------------------------------
 WITH reserva_hotel AS(
     SELECT DISTINCT -- associa cada reserva ao hotel correspondente, sem duplicar
         rq.num_reserva,

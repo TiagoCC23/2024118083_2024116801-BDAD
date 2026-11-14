@@ -1,7 +1,7 @@
 # 6.4. Dados
 
 ## 1. Visão Geral do Povoamento
-O script `sql/02_seed_data.sql` povoa todas as 11 tabelas do esquema com dados diversificados e consistentes com as restrições declarativas e com as regras de negócio da Fase 1.
+O script `sql/seed.sql` povoa todas as 11 tabelas do esquema com dados diversificados e consistentes com as restrições declarativas e com as regras de negócio da Fase 1.
 
 O script é **idempotente**: executa `TRUNCATE ... RESTART IDENTITY CASCADE` antes das inserções, garantindo que possa ser reexecutado de forma previsível sem duplicar registos.
 
