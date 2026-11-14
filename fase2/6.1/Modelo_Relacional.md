@@ -2,8 +2,6 @@
 
 Notação utilizada: **PK** — chave primária (sublinhada no esquema), **FK** — chave estrangeira (em *itálico* no esquema), **CK** — chave candidata, `?` — atributo opcional (admite `NULL`).
 
----
-
 ## 1. Decisões de Mapeamento (Modelo ER → Modelo Relacional)
 
 A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as regras padrão de derivação, incorporando correções e refinamentos necessários para garantir a coerência com os requisitos (`RD01–RD08`), as regras de negócio (`RN01–RN08`) e as necessidades de informação (`Q01–Q07`):
@@ -21,8 +19,6 @@ A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as 
 | D9 | `CLIENTE` 1:N `RESERVA` (*Realiza*), com FK obrigatória `ID_Cliente` em `RESERVA`. | Garante a **RN01** (toda a reserva pertence a um único cliente registado). |
 | D10 | Remoção do valor `'ocupado'` do domínio de `Estado_Manutencao` em `QUARTO`. | A ocupação de um quarto num determinado período é informação derivável a partir de `RESERVA` e `RESERVA_QUARTO`. Armazená-la em `QUARTO` introduziria redundância e risco de inconsistência temporal. O estado passa a refletir apenas a condição física: `{'livre_limpo', 'em_limpeza', 'em_manutencao'}`. |
 | D11 | `Telefone` deixa de ser chave candidata em `CLIENTE` e `FUNCIONARIO`. | Ao contrário de `NIF`, `Doc_Identificacao` (**RN05**) e `Email`, o número de telefone pode ser partilhado (ex.: agregados familiares ou extensões empresariais). |
-
----
 
 ## 2. Domínios Relevantes
 
@@ -45,8 +41,6 @@ A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as 
 | `Estado_Pagamento` | `{'pendente', 'pago', 'reembolsado'}` | `PAGAMENTO.Estado_Pagamento` |
 | `Estado_Manutencao` | `{'livre_limpo', 'em_limpeza', 'em_manutencao'}` | `QUARTO.Estado_Manutencao` |
 
----
-
 ## 3. Esquema Relacional
 
 * **HOTEL** (<u>ID_Hotel</u>, Nome_Hotel, Morada, Cidade, Pais, Telefone)
@@ -60,8 +54,6 @@ A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as 
 * **RESERVA_QUARTO** (<u>*ID_Reserva*, *ID_Quarto*</u>)
 * **RESERVA_SERVICO** (<u>*ID_Reserva*, *ID_Servico*, Data_Servico</u>, Quantidade, Preco_Aplicado)
 * **PAGAMENTO** (<u>ID_Pagamento</u>, *ID_Reserva*, Numero_Prestacao, Valor_Prestacao, Metodo_Pagamento`?`, Estado_Pagamento, Data_Prevista, Data_Pagamento`?`)
-
----
 
 ## 4. Especificação das Relações e Chaves
 

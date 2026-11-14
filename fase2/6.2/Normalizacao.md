@@ -1,7 +1,5 @@
 # 6.2 Normalização
 
-Grupo: Rayssa Santos (2024118083) e Tiago Chousal (2024116801)
-
 ## 1. Método
 
 Para cada relação:
