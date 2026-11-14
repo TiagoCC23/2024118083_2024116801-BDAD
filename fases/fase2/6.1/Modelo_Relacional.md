@@ -29,10 +29,10 @@ A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as 
 | `Doc_Identificacao` | `VARCHAR(30)` (único, não nulo) | `CLIENTE` |
 | `Email` | `VARCHAR(100)` (único, contém `@`) | `CLIENTE`, `FUNCIONARIO` |
 | `Telemovel` | `VARCHAR(20)` | `HOTEL`, `CLIENTE`, `FUNCIONARIO` |
-| `NUM_QUARTO `| `VARCHAR(10)` (único, não nulo) | Permite números de quartos com zeros à esquerda ou letras (ex.: '101'. '101A') |
+| `NUM_QUARTO `| `VARCHAR(10)` (não nulo; único por hotel com `ID_Hotel`) | Permite números de quartos com zeros à esquerda ou letras (ex.: '101', '101A') |
 | Nomes e moradas | `VARCHAR(100)` a `VARCHAR(200)` | `Nome`, `Nome_Hotel`, `Morada`, `Cidade`, `Pais`, `Nome_Tipo`, `Nome_Servico` |
 | Descrições | `TEXT` | `TIPO_QUARTO.Descricao` |
-| Valores monetários | `NUMERIC(10,2)`, `>= 0` | `Preco_Noite`, `Preco_Unitario`, `Preco_Aplicado`, `Valor_Prestacao` |
+| Valores monetários | `NUMERIC(10,2)`, `> 0` | `Preco_Noite`, `Preco_Unitario`, `Preco_Aplicado`, `Valor_Prestacao` |
 | Datas | `DATE` | `Data_Contratacao`, `Data_Criacao`, `Data_CheckIn`, `Data_CheckOut`, `Data_Servico`, `Data_Prevista`, `Data_Pagamento` |
 | Contadores positivos | `INTEGER`, `>= 1` | `Capacidade_Maxima`, `Num_Hospedes`, `Quantidade`, `Numero_Prestacao` |
 | `Piso` | `SMALLINT` | `QUARTO.Piso` *(admite `0` para rés-do-chão e valores negativos para pisos inferiores)* |
@@ -104,8 +104,8 @@ Como todas as chaves primárias referenciadas são artificiais e imutáveis, def
 |-------|----------------------------|--------------| --------- | 
 | **RN01** | `ID_Cliente NOT NULL` + `FOREIGN KEY` | `RESERVA` | Cada reserva tem de estar associada a um único cliente. |
 | **RN02** | `CHECK (Data_CheckOut > Data_CheckIn)` | `RESERVA` | Check-out estritamente posterior ao check-in. |
-| **RN03** | Não sobreposição de reservas ativas (`pendente`, `confirmada`, `concluida`) no mesmo quarto — regra inter-registos/inter-tabelas a garantir na **Fase 3** (trigger / restrição de exclusão). | `RESERVA`, `RESERVA_QUARTO` |
-| **RN04** | `Num_Hospedes` ≤ soma de `Capacidade_Maxima` dos quartos da reserva — envolve agregação entre várias tabelas, logo a garantir via **trigger na Fase 3**. | `RESERVA`, `RESERVA_QUARTO`, `QUARTO`, `TIPO_QUARTO` |
+| **RN03** | Não sobreposição de reservas ativas (`pendente`, `confirmada`, `concluida`) no mesmo quarto — regra inter-registos/inter-tabelas a garantir na **Fase 3** (trigger / restrição de exclusão). | `RESERVA`, `RESERVA_QUARTO` | Não pode haver sobreposição de datas de reserva para o mesmo quarto (exceto canceladas).  |
+| **RN04** | `Num_Hospedes` ≤ soma de `Capacidade_Maxima` dos quartos da reserva — envolve agregação entre várias tabelas, logo a garantir via **trigger na Fase 3**. | `RESERVA`, `RESERVA_QUARTO`, `QUARTO`, `TIPO_QUARTO` | O número de hóspedes nunca poderá exceder a capacidade máxima. |
 | **RN05** | `UNIQUE (NIF)` e `UNIQUE (Doc_Identificacao)` | `CLIENTE` | NIF e documento de identificação únicos por cliente. |
 | **RN06** | `CHECK (valor > 0)` em `Preco_Noite`, `Preco_Unitario`, `Preco_Aplicado` e `Valor_Prestacao` | `TIPO_QUARTO`, `SERVICO`, `RESERVA_SERVICO`, `PAGAMENTO` | Todos os valores monetários > 0. | 
 | **RN07** | Atributo escalar único `Metodo_Pagamento` por registo de pagamento | `PAGAMENTO` | Registo com método de pagamento único por transação. |
