@@ -29,6 +29,7 @@ A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as 
 | `Doc_Identificacao` | `VARCHAR(30)` (único, não nulo) | `CLIENTE` |
 | `Email` | `VARCHAR(100)` (único, contém `@`) | `CLIENTE`, `FUNCIONARIO` |
 | `Telefone` | `VARCHAR(20)` | `HOTEL`, `CLIENTE`, `FUNCIONARIO` |
+| `NUM_QUARTO `| `VARCHAR(10)` (único, não nulo) | Permite números de quartos com zeros à esquerda ou letras (ex.: '101'. '101A') |
 | Nomes e moradas | `VARCHAR(100)` a `VARCHAR(200)` | `Nome`, `Nome_Hotel`, `Morada`, `Cidade`, `Pais`, `Nome_Tipo`, `Nome_Servico` |
 | Descrições | `TEXT` | `TIPO_QUARTO.Descricao` |
 | Valores monetários | `NUMERIC(10,2)`, `>= 0` | `Preco_Noite`, `Preco_Unitario`, `Preco_Aplicado`, `Valor_Prestacao` |
@@ -99,22 +100,22 @@ Como todas as chaves primárias referenciadas são artificiais e imutáveis, def
 
 ### 5.3. Rastreabilidade das Regras de Negócio e Restrições Semânticas
 
-| Regra | Mecanismo de Implementação | Relação(ões) |
-|-------|----------------------------|--------------|
-| **RN01** | `ID_Cliente NOT NULL` + `FOREIGN KEY` | `RESERVA` |
-| **RN02** | `CHECK (Data_CheckOut > Data_CheckIn)` | `RESERVA` |
+| Regra | Mecanismo de Implementação | Relação(ões) | Descrição |
+|-------|----------------------------|--------------| --------- | 
+| **RN01** | `ID_Cliente NOT NULL` + `FOREIGN KEY` | `RESERVA` | Cada reserva tem de estar associada a um único cliente. |
+| **RN02** | `CHECK (Data_CheckOut > Data_CheckIn)` | `RESERVA` | Check-out estritamente posterior ao check-in. |
 | **RN03** | Não sobreposição de reservas ativas (`pendente`, `confirmada`, `concluida`) no mesmo quarto — regra inter-registos/inter-tabelas a garantir na **Fase 3** (trigger / restrição de exclusão). | `RESERVA`, `RESERVA_QUARTO` |
 | **RN04** | `Num_Hospedes` ≤ soma de `Capacidade_Maxima` dos quartos da reserva — envolve agregação entre várias tabelas, logo a garantir via **trigger na Fase 3**. | `RESERVA`, `RESERVA_QUARTO`, `QUARTO`, `TIPO_QUARTO` |
-| **RN05** | `UNIQUE (NIF)` e `UNIQUE (Doc_Identificacao)` | `CLIENTE` |
-| **RN06** | `CHECK (valor >= 0)` em `Preco_Noite`, `Preco_Unitario`, `Preco_Aplicado` e `Valor_Prestacao` | `TIPO_QUARTO`, `SERVICO`, `RESERVA_SERVICO`, `PAGAMENTO` |
-| **RN07** | Atributo escalar único `Metodo_Pagamento` por registo de pagamento | `PAGAMENTO` |
-| **RN08** | `CHECK ((Cargo = 'gestor_cadeia' AND ID_Hotel IS NULL) OR (Cargo IN ('rececionista', 'gestor_hotel') AND ID_Hotel IS NOT NULL))` | `FUNCIONARIO` |
+| **RN05** | `UNIQUE (NIF)` e `UNIQUE (Doc_Identificacao)` | `CLIENTE` | NIF e documento de identificação únicos por cliente. |
+| **RN06** | `CHECK (valor > 0)` em `Preco_Noite`, `Preco_Unitario`, `Preco_Aplicado` e `Valor_Prestacao` | `TIPO_QUARTO`, `SERVICO`, `RESERVA_SERVICO`, `PAGAMENTO` | Todos os valores monetários > 0. | 
+| **RN07** | Atributo escalar único `Metodo_Pagamento` por registo de pagamento | `PAGAMENTO` | Registo com método de pagamento único por transação. |
+| **RN08** | `CHECK ((Cargo = 'gestor_cadeia' AND ID_Hotel IS NULL) OR (Cargo IN ('rececionista', 'gestor_hotel') AND ID_Hotel IS NOT NULL))` | `FUNCIONARIO` | Cargo gestor_cadeia não afeto a hotel; restantes obrigatórios. |
 
 **Restrições adicionais do modelo:**
 * `RESERVA`: `CHECK (Num_Hospedes >= 1)` e domínio de `Estado_Reserva`.
 * `TIPO_QUARTO`: `CHECK (Capacidade_Maxima >= 1)`.
 * `RESERVA_SERVICO`: `CHECK (Quantidade >= 1)`.
-* `PAGAMENTO`: `CHECK (Numero_Prestacao >= 1)`, `UNIQUE (ID_Reserva, Numero_Prestacao)` e `CHECK (Estado_Pagamento <> 'pago' OR (Data_Pagamento IS NOT NULL AND Metodo_Pagamento IS NOT NULL))`.
+* `PAGAMENTO`: `CHECK (Numero_Prestacao >= 1)`, `UNIQUE (ID_Reserva, Numero_Prestacao)` e `CHECK (Estado_Pagamento = 'pendente' OR (Data_Pagamento IS NOT NULL AND Metodo_Pagamento IS NOT NULL))`.
 * **Consistência inter-tabelas (a tratar por trigger na Fase 3):**
   1. Todos os quartos associados à mesma reserva (`RESERVA_QUARTO`) devem pertencer ao **mesmo hotel** (necessário para responder sem ambiguidade a **Q07** — receita por hotel).
   2. Qualquer serviço registado em `RESERVA_SERVICO` deve constar na oferta (`HOTEL_SERVICO`) do hotel onde decorre a reserva.

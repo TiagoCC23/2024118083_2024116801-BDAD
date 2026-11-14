@@ -8,12 +8,25 @@
 > 
 > *Bases de Dados I*
 > 
-> ***FEITO POR: Rayssa Santos e Tiago chousal***
+> ***FEITO POR: Rayssa Santos e Tiago Chousal***
 
 ---
 
 # Tema: 
 Base de dados de um Alojamento Local/ Hotel
+
+---
+## Estrutura
+```
+sql/
+  01_schema.sql          # Criação previsível do esquema (6.3)
+  02_seed_data.sql       # Povoamento de dados (6.4)
+  03_queries.sql         # Início das consultas Q01-Q07 (6.5)
+fase2/
+  6.1/Modelo_Relacional.md
+  6.2/Normalizacao.md
+  6.3/Implementacao_PostgreSQL.md
+```
 
 ---
 
