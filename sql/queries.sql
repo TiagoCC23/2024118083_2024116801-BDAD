@@ -1,0 +1,91 @@
+-- Q01: Quais são os quartos disponíveis (não reservados) para um determinado intervalo de datas?
+
+-- Q02: Qual é o histórico de reservas efetuadas por um determinado cliente?
+
+-- Q03: Qual é o valor total de faturação acumulado por método de pagamento num determinado mês?
+
+-- Q04: Em quantas reservas foi incluído cada serviço adicional? 
+SELECT s.id_servico, s.nome_servico, COUNT(DISTINCT rs.id_reserva) AS total_reservas, -- nao conta as reservas repetidas
+COALESCE(SUM(rs.quantidade), 0) AS total_unidades_consumidas -- passa as reservas a null para 0 para a contagem
+FROM servico s
+LEFT JOIN reserva_servico rs ON s.id_servico = rs.id_servico -- mantem no resultado os serviços com 0 reservas associadas (um join normal apagava os serviços)
+LEFT JOIN reserva r ON rs.id_reserva = r.id_reserva -- filtro de estado fica no ON para não eliminar serviços sem reservas válidas
+    AND r.estado_reserva = 'cancelada'
+GROUP BY s.id_servico, s.nome_servico
+ORDER BY total_reservas DESC, s.nome_servico;
+
+-- Q05: Qual é a taxa de ocupação dos quartos agrupada por tipo de quarto num determinado período?
+WITH periodo AS (
+    SELECT -- intervalo de análise
+    DATE '2024-01-01' AS data_inicio,
+    DATE '2024-01-31' AS data_fim
+)
+SELECT tq.id_tipo_quarto, tq.nome_tipo_quarto,
+    COUNT(DISTINCT q.id_quarto) AS total_quartos, 
+    COALESCE(SUM(GREATEST(0, LEAST(r.data_checkout, p.data_fim + 1) - GREATEST(r.data_checkin, p.data_inicio))), 0) AS total_dias_ocupados, -- soma os dias pertencentes ao intervalo
+ROUND(
+    COALESCE(SUM(
+            GREATEST(0,
+                LEAST(r.data_checkout, p.data_fim + 1) - GREATEST(r.data_checkin, p.data_inicio) -- (noites ocupadas / capacidade total de noites no período) * 100
+            )
+        ), 0)::NUMERIC
+        / NULLIF(COUNT(DISTINCT q.id_quarto) * (p.data_fim - p.data_inicio + 1), 0) * 100,
+    2) AS taxa_ocupacao
+FROM tipo_quarto tq
+CROSS JOIN periodo p
+LEFT JOIN quarto q ON tq.id_tipo_quarto = q.id_tipo_quarto
+LEFT JOIN reserva_quarto rq ON q.id_quarto = rq.num_quarto
+LEFT JOIN reserva r ON rq.id_reserva = r.id_reserva -- filtra apenas reservas confirmadas/concluídas que intersetam o período
+    AND r.estado_reserva IN ('confirmada', 'concluida')
+    AND r.data_checkin < p.data_fim
+    AND r.data_checkout > p.data_inicio
+GROUP BY tq.id_tipo_quarto, tq.nome_tipo_quarto, p.data_inicio, p.data_fim
+ORDER BY taxa_ocupacao DESC, tq.nome_tipo_quarto;
+
+
+-- Q06: Quais são as reservas pendentes de pagamento cuja data de check-in é no próprio dia?
+SELECT
+    r.id_reserva,
+    c.nome AS nome_cliente,
+    c.telemovel,
+    c.email,
+    r.data_checkin,
+    r.data_checkout,
+    r.estado_reserva,
+    COALESCE(SUM(p.valor_prestacao), 0) AS montante_pendente -- soma as prestaçoes pendentes
+FROM reserva r
+JOIN cliente c ON r.id_cliente = c.id_cliente
+LEFT JOIN pagamento p ON r.id_reserva = p.id_reserva -- apanha as reservas que nao tem pagamentos associados (LEFT JOIN) e filtra apenas os pagamentos pendentes
+    AND p.estado_pagamento = 'pendente'
+WHERE r.data_checkin = CURRENT_DATE
+    AND r.estado_reserva = ('pendente', 'confirmada')
+    AND (
+        p.id_pagamento IS NULL OR NOT EXISTS ( -- OU existe pelo menos uma prestação com estado 'pendente'
+            SELECT 1
+            FROM pagamento p2
+            WHERE p2.id_reserva = r.id_reserva
+              AND p2.estado_pagamento = 'pago' -- nao existe nenhuma prestação ja paga para esta reserva
+        )
+    )
+GROUP BY r.id_reserva, c.nome, c.telemovel, c.email, r.data_checkin, r.data_checkout, r.estado_reserva
+ORDER BY r.data_checkin;
+
+-- Q07: Qual hotel da cadeia teve maior receita total no último mês?
+WITH reserva_hotel AS(
+    SELECT DISTINCT -- associa cada reserva ao hotel correspondente, sem duplicar
+        rq.num_reserva,
+        q.id_hotel,
+    FROM reserva_quarto rq
+    JOIN quarto q ON rq.num_quarto = q.num_quarto
+) SELECT
+    h.id_hotel,
+    h.nome_hotel,
+    h.cidade,
+    COUNT(DISTINCT rh.id_reserva) AS total_reservas,
+    COALESCE(SUM(p.valor_prestacao), 0) AS receita_total -- soma apenas as prestaçoes pagas
+FROM hotel h
+LEFT JOIN reserva_hotel rh ON h.id_hotel = rh.id_hotel
+LEFT JOIN pagamento p ON rh.id_reserva = p.id_reserva -- junta apenas as prestaçoes pagas
+    AND p.estado_pagamento = 'pago'
+GROUP BY h.id_hotel, h.nome_hotel, h.cidade
+ORDER BY receita_total DESC h.nome_hotel
