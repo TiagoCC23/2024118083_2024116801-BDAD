@@ -20,7 +20,7 @@ Notação: `X → Y` significa que `X` determina `Y`. Todas as DF `CK → (resta
 
 | Relação | Chaves candidatas | DF (todas têm uma CK à esquerda) |
 |---|---|---|
-| HOTEL | `ID_Hotel`; `Nome_Hotel` | `ID_Hotel → Nome_Hotel, Morada, Cidade, Pais, Telefone`; `Nome_Hotel → ID_Hotel, …` |
+| HOTEL | `ID_Hotel`; `Nome_Hotel` | `ID_Hotel → Nome_Hotel, Morada, Cidade, Pais, Telemovel`; `Nome_Hotel → ID_Hotel, …` |
 | TIPO_QUARTO | `ID_TipoQuarto`; `Nome_Tipo` | `ID_TipoQuarto → Nome_Tipo, Descricao, Capacidade_Maxima, Preco_Noite`; `Nome_Tipo → ID_TipoQuarto, …` |
 | QUARTO | `ID_Quarto`; `(ID_Hotel, Num_Quarto)` | `ID_Quarto → ID_Hotel, ID_TipoQuarto, Num_Quarto, Piso, Estado_Manutencao`; `(ID_Hotel, Num_Quarto) → ID_Quarto, ID_TipoQuarto, Piso, Estado_Manutencao` |
 | SERVICO | `ID_Servico`; `Nome_Servico` | `ID_Servico → Nome_Servico, Preco_Unitario`; `Nome_Servico → ID_Servico, Preco_Unitario` |
@@ -36,7 +36,7 @@ Notação: `X → Y` significa que `X` determina `Y`. Todas as DF `CK → (resta
 
 - **Atomicidade.** Nenhum atributo guarda listas. Um quarto de uma reserva não é uma lista de quartos numa string: está em `RESERVA_QUARTO`. Cada serviço prestado é uma linha de `RESERVA_SERVICO`. Cada prestação é uma linha de `PAGAMENTO`.
 - **Sem grupos repetitivos.** Não existem colunas do tipo `Quarto_1, Quarto_2` nem `Prestacao_1, Prestacao_2`.
-- **`Morada` e `Telefone`** são tratados como atómicos no contexto do domínio: nenhuma necessidade de informação (Q01–Q07) exige consultar rua ou número separadamente, e cada entidade tem um único telefone. Se fossem necessários vários contactos, deveriam passar a uma relação própria.
+- **`Morada` e `Telemovel`** são tratados como atómicos no contexto do domínio: nenhuma necessidade de informação (Q01–Q07) exige consultar rua ou número separadamente, e cada entidade tem um único telemovel. Se fossem necessários vários contactos, deveriam passar a uma relação própria.
 - **Chave primária.** Todas as relações têm PK definida (6.1).
 
 > ***Todas as relações estão em 1NF.***

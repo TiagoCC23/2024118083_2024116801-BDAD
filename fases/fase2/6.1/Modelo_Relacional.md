@@ -18,7 +18,7 @@ A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as 
 | D8 | `QUARTO` N:1 `TIPO_QUARTO` (*Pertence*), com FK obrigatória `ID_TipoQuarto` em `QUARTO`. | Participação total de `QUARTO` `(1,1)`. |
 | D9 | `CLIENTE` 1:N `RESERVA` (*Realiza*), com FK obrigatória `ID_Cliente` em `RESERVA`. | Garante a **RN01** (toda a reserva pertence a um único cliente registado). |
 | D10 | Remoção do valor `'ocupado'` do domínio de `Estado_Manutencao` em `QUARTO`. | A ocupação de um quarto num determinado período é informação derivável a partir de `RESERVA` e `RESERVA_QUARTO`. Armazená-la em `QUARTO` introduziria redundância e risco de inconsistência temporal. O estado passa a refletir apenas a condição física: `{'livre_limpo', 'em_limpeza', 'em_manutencao'}`. |
-| D11 | `Telefone` deixa de ser chave candidata em `CLIENTE` e `FUNCIONARIO`. | Ao contrário de `NIF`, `Doc_Identificacao` (**RN05**) e `Email`, o número de telefone pode ser partilhado (ex.: agregados familiares ou extensões empresariais). |
+| D11 | `Telemovel` deixa de ser chave candidata em `CLIENTE` e `FUNCIONARIO`. | Ao contrário de `NIF`, `Doc_Identificacao` (**RN05**) e `Email`, o número de telemovel pode ser partilhado (ex.: agregados familiares ou extensões empresariais). |
 
 ## 2. Domínios Relevantes
 
@@ -28,7 +28,7 @@ A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as 
 | `NIF` | `VARCHAR(20)` (único, não nulo) | `CLIENTE`, `FUNCIONARIO` *(acomoda NIF nacional de 9 dígitos e identificadores fiscais estrangeiros, dado o atributo `Pais`)* |
 | `Doc_Identificacao` | `VARCHAR(30)` (único, não nulo) | `CLIENTE` |
 | `Email` | `VARCHAR(100)` (único, contém `@`) | `CLIENTE`, `FUNCIONARIO` |
-| `Telefone` | `VARCHAR(20)` | `HOTEL`, `CLIENTE`, `FUNCIONARIO` |
+| `Telemovel` | `VARCHAR(20)` | `HOTEL`, `CLIENTE`, `FUNCIONARIO` |
 | `NUM_QUARTO `| `VARCHAR(10)` (único, não nulo) | Permite números de quartos com zeros à esquerda ou letras (ex.: '101'. '101A') |
 | Nomes e moradas | `VARCHAR(100)` a `VARCHAR(200)` | `Nome`, `Nome_Hotel`, `Morada`, `Cidade`, `Pais`, `Nome_Tipo`, `Nome_Servico` |
 | Descrições | `TEXT` | `TIPO_QUARTO.Descricao` |
@@ -44,13 +44,13 @@ A conversão do modelo conceptual da Fase 1 para o esquema relacional seguiu as 
 
 ## 3. Esquema Relacional
 
-* **HOTEL** (<u>ID_Hotel</u>, Nome_Hotel, Morada, Cidade, Pais, Telefone)
+* **HOTEL** (<u>ID_Hotel</u>, Nome_Hotel, Morada, Cidade, Pais, Telemovel)
 * **TIPO_QUARTO** (<u>ID_TipoQuarto</u>, Nome_Tipo, Descricao`?`, Capacidade_Maxima, Preco_Noite)
 * **QUARTO** (<u>ID_Quarto</u>, *ID_Hotel*, *ID_TipoQuarto*, Num_Quarto, Piso, Estado_Manutencao)
 * **SERVICO** (<u>ID_Servico</u>, Nome_Servico, Preco_Unitario)
 * **HOTEL_SERVICO** (<u>*ID_Hotel*, *ID_Servico*</u>)
-* **CLIENTE** (<u>ID_Cliente</u>, Nome, NIF, Doc_Identificacao, Email, Telefone, Pais)
-* **FUNCIONARIO** (<u>ID_Funcionario</u>, *ID_Hotel`?`*, Nome, NIF, Email, Telefone, Cargo, Data_Contratacao)
+* **CLIENTE** (<u>ID_Cliente</u>, Nome, NIF, Doc_Identificacao, Email, Telemovel, Pais)
+* **FUNCIONARIO** (<u>ID_Funcionario</u>, *ID_Hotel`?`*, Nome, NIF, Email, Telemovel, Cargo, Data_Contratacao)
 * **RESERVA** (<u>ID_Reserva</u>, *ID_Cliente*, *ID_Funcionario`?`*, Data_Criacao, Data_CheckIn, Data_CheckOut, Estado_Reserva, Num_Hospedes)
 * **RESERVA_QUARTO** (<u>*ID_Reserva*, *ID_Quarto*</u>)
 * **RESERVA_SERVICO** (<u>*ID_Reserva*, *ID_Servico*, Data_Servico</u>, Quantidade, Preco_Aplicado)
@@ -127,5 +127,5 @@ Como todas as chaves primárias referenciadas são artificiais e imutáveis, def
 3. Formalização de `PAGAMENTO.Reserva_ID` como `FK ID_Reserva` numa relação `1:N` com `RESERVA` (**D3**).
 4. Alteração de `FUNCIONARIO.ID_Hotel` para opcional (`NULL`), alinhando o modelo com a **RN08** (**D4**).
 5. Criação das relações associativas `RESERVA_SERVICO` e `HOTEL_SERVICO` (**D5, D6**).
-6. Remoção de `Telefone` como chave candidata (**D11**) e remoção de `'ocupado'` de `Estado_Manutencao` (**D10**).
+6. Remoção de `Telemovel` como chave candidata (**D11**) e remoção de `'ocupado'` de `Estado_Manutencao` (**D10**).
 7. Ajuste do domínio de `NIF` de `VARCHAR(100)` para `VARCHAR(20)`.
