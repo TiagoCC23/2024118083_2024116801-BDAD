@@ -1,3 +1,5 @@
+--psql -U postgres -d hotel_db -f seed.sql
+
 -- ============================================================================
 -- 6.4. Dados — Povoamento inicial da base de dados
 -- Contexto A: Cadeia de Hotéis

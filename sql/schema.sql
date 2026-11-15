@@ -1,3 +1,5 @@
+-- psql -U postgres -d hotel_db -f schema.sql
+
 BEGIN;
 
 ----------------------------------------------------------------------------
@@ -143,7 +145,7 @@ CREATE TABLE funcionario (
     telemovel VARCHAR(20) NOT NULL,
 
     CONSTRAINT chk_funcionario_nome_nao_vazio CHECK (BTRIM(nome) <> ''),
-    CONSTRAINT chk_funcionario_telemovel_nao_vazio CHECK (BTRIM(telemovel) <> '')
+    CONSTRAINT chk_funcionario_telemovel_nao_vazio CHECK (BTRIM(telemovel) <> ''),
     CONSTRAINT chk_cargo_hotel CHECK (
         (Cargo = 'gestor_cadeia' AND ID_Hotel IS NULL) OR
         (Cargo IN ('rececionista', 'gestor_hotel') AND ID_Hotel IS NOT NULL)
@@ -167,9 +169,9 @@ CREATE TABLE reserva (
     data_checkin DATE NOT NULL,
     data_checkout DATE NOT NULL,
 
-    CONSTRAINT chk_datas_reserva CHECK (data_checkin < data_checkout),
+    CONSTRAINT chk_datas_reserva CHECK (data_checkin < data_checkout)
 
-)
+);
 
 --------------------
 -- RESERVA_QUARTO

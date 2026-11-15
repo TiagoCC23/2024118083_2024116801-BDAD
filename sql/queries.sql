@@ -1,3 +1,5 @@
+--psql -U postgres -d hotel_db -f queries.sql
+
 --------------------------------------------------------------------------------------------------
 -- Q01: Quais são os quartos disponíveis (não reservados) para um determinado intervalo de datas?
 --------------------------------------------------------------------------------------------------
