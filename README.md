@@ -44,6 +44,9 @@ O objetivo é garantir o controle rigoroso da disponibilidade de quartos, evitar
 * **Reserva**: Registo formal de uma intenção de ocupação de um quarto por um cliente num determinado intervalo de datas (check-in e check-out).
 * **Pagamento**: Registo da transação financeira referente ao valor total de uma reserva ou serviço.
 * **Serviço**: Prestação adicional disponibilizada pelo hotel para o cliente durante a sua estadia.
+* **Funcionário**: Colaborador do hotel responsável por processar reservas, check-in/check-out e registar serviços. 
+* **Hotel**: Unidade física da cadeia hoteleira, com os seus próprios quartos e funcionários. 
+
 
 ---
 
@@ -71,9 +74,12 @@ O objetivo é garantir o controle rigoroso da disponibilidade de quartos, evitar
 ---
 
 ## Atores e necessidades de acesso
-Cliente: Consultar a disponibilidade de quartos, criar reservas próprias, consultar o histórico do seu perfil/reservas e efetuar pagamentos.
-Recepcionista/Funcionário: Consultar e gerir a disponibilidade dos quartos, efetuar check-in/check-out, registar/alterar reservas, registar serviços adicionais e emitir/consultar pagamentos.
-Gestor do hotel: Acesso completo para consultar, alterar e analisar todos os dados do sistema (quartos, clientes, reservas, faturação e relatórios de ocupação/serviços).
+* **Recepcionista**: Consultar e gerir a disponibilidade dos quartos do seu hotel, efetuar check-in/check-out, registar/alterar reservas, registar serviços adicionais e emitir/consultar pagamentos — restrito ao hotel a que está afeto.
+* **Cliente**: Consultar a disponibilidade de quartos, criar reservas próprias, consultar o histórico do seu perfil/reservas e efetuar pagamentos.
+* **Recepcionista/Funcionário**: Consultar e gerir a disponibilidade dos quartos, efetuar check-in/check-out, registar/alterar reservas, registar serviços adicionais e emitir/consultar pagamentos.
+* **Gestor de Hotel**: Acesso completo aos dados do seu hotel (quartos, funcionários, reservas, faturação e relatórios de ocupação/serviços) — restrito ao hotel a que está afeto.
+* **Gestor de Cadeia**: Acesso completo a todos os hotéis da cadeia — consulta e análise agregada de ocupação, faturação e desempenho entre hotéis, e gestão de dados de qualquer hotel.
+
 
 ---
 
