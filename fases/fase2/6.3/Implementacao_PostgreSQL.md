@@ -1,7 +1,7 @@
 # 6.3. Implementação PostgreSQL
 
 ## 1. Estrutura e Reprodutibilidade
-O esquema físico encontra-se no script `sql/01_schema.sql`.
+O esquema físico encontra-se no script `sql/schema.sql`.
 Para garantir que a base de dados possa ser recriada de forma previsível e atómica:
 - O script inicia com `DROP TABLE IF EXISTS ... CASCADE` pela ordem inversa das dependências referenciais.
 - Toda a criação de tabelas e restrições decorre dentro de uma transação (`BEGIN; ... COMMIT;`).
@@ -28,6 +28,6 @@ Para garantir que a base de dados possa ser recriada de forma previsível e ató
 
 ## 4. Como executar
 ```
-createdb hotel_bdad
-psql -d hotel_bdad -v ON_ERROR_STOP=1 -f sql/01_schema.sql
+createdb hotel_db
+psql -U postgres -d hotel_db -f sql/schema.sql
 ```

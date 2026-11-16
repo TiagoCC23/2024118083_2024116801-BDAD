@@ -1,3 +1,5 @@
+--psql -U postgres -d hotel_db -f seed.sql
+
 -- ============================================================================
 -- 6.4. Dados — Povoamento inicial da base de dados
 -- Contexto A: Cadeia de Hotéis
@@ -25,7 +27,7 @@ RESTART IDENTITY CASCADE;
 -- ----------------------------------------------------------------------------
 -- 1. HOTEL (3 unidades da cadeia)
 -- ----------------------------------------------------------------------------
-INSERT INTO hotel (nome_hotel, morada, cidade, pais, telefone) VALUES
+INSERT INTO hotel (nome_hotel, morada, cidade, pais, telemovel) VALUES
     ('Hotel UFP Porto',   'Rua da Boavista, 420',       'Porto',    'Portugal', '+351220100100'),
     ('Hotel UFP Lisboa',  'Av. da Liberdade, 185',      'Lisboa',   'Portugal', '+351210200200'),
     ('Hotel UFP Algarve', 'Av. Infante de Sagres, 78',  'Quarteira','Portugal', '+351289300300');
@@ -100,7 +102,7 @@ JOIN servico s ON (
 -- ----------------------------------------------------------------------------
 -- 6. CLIENTE (clientes nacionais e estrangeiros + cliente sem reservas)
 -- ----------------------------------------------------------------------------
-INSERT INTO cliente (nome, nif, doc_identificacao, email, telefone, pais) VALUES
+INSERT INTO cliente (nome, nif, doc_identificacao, email, telemovel, pais) VALUES
     ('Ana Ferreira',   '245678901',     'CC14589012',   'ana.ferreira@email.pt',     '+351912345001', 'Portugal'),
     ('Bruno Costa',    '234567892',     'CC22334455',   'bruno.costa@email.pt',      '+351912345002', 'Portugal'),
     ('Carla Mendes',   '256789013',     'CC33445566',   'carla.mendes@email.pt',     '+351912345003', 'Portugal'),
@@ -112,7 +114,7 @@ INSERT INTO cliente (nome, nif, doc_identificacao, email, telefone, pais) VALUES
 -- ----------------------------------------------------------------------------
 -- 7. FUNCIONARIO (cobrindo os 3 cargos da RN08)
 -- ----------------------------------------------------------------------------
-INSERT INTO funcionario (id_hotel, nome, nif, email, telefone, cargo, data_contratacao) VALUES
+INSERT INTO funcionario (id_hotel, nome, nif, email, telemovel, cargo, data_contratacao) VALUES
     -- gestor_cadeia com id_hotel NULL (RN08)
     (NULL, 'Beatriz Almeida', '211111111', 'beatriz.almeida@hotelufp.pt', '+351910000001', 'gestor_cadeia', '2022-01-10'),
     -- restantes cargos com id_hotel obrigatório (RN08)
@@ -279,7 +281,7 @@ INSERT INTO reserva_servico (id_reserva, id_servico, data_servico, quantidade, p
     -- R3 (Porto): Transfer cortesia (preco_aplicado = 0.00 -> fronteira RN06 e histórico D5)
     ((SELECT r.id_reserva FROM reserva r JOIN cliente c ON c.id_cliente = r.id_cliente
       WHERE c.nif = '256789013' AND r.data_checkin = '2026-07-02'),
-     (SELECT id_servico FROM servico WHERE nome_servico = 'Transfer Aeroporto'), '2026-07-02', 1, 0.00),
+     (SELECT id_servico FROM servico WHERE nome_servico = 'Transfer Aeroporto'), '2026-07-02', 1, 25.00),
 
     -- R4 (Lisboa): Pequeno-almoço + Spa
     ((SELECT r.id_reserva FROM reserva r JOIN cliente c ON c.id_cliente = r.id_cliente
