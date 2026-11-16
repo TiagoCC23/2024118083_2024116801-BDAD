@@ -44,6 +44,9 @@ O objetivo é garantir o controle rigoroso da disponibilidade de quartos, evitar
 * **Reserva**: Registo formal de uma intenção de ocupação de um quarto por um cliente num determinado intervalo de datas (check-in e check-out).
 * **Pagamento**: Registo da transação financeira referente ao valor total de uma reserva ou serviço.
 * **Serviço**: Prestação adicional disponibilizada pelo hotel para o cliente durante a sua estadia.
+* **Funcionário**: Colaborador do hotel responsável por processar reservas, check-in/check-out e registar serviços. 
+* **Hotel**: Unidade física da cadeia hoteleira, com os seus próprios quartos e funcionários. 
+
 
 ---
 
