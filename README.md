@@ -19,9 +19,9 @@ Base de dados de um Alojamento Local/ Hotel
 ## Estrutura
 ```
 sql/
-  01_schema.sql          # Criação previsível do esquema (6.3)
-  02_seed_data.sql       # Povoamento de dados (6.4)
-  03_queries.sql         # Início das consultas Q01-Q07 (6.5)
+  schema.sql          # Criação previsível do esquema (6.3)
+  seed_data.sql       # Povoamento de dados (6.4)
+  queries.sql         # Início das consultas Q01-Q07 (6.5)
 fase2/
   6.1/Modelo_Relacional.md
   6.2/Normalizacao.md
@@ -55,6 +55,7 @@ O objetivo é garantir o controle rigoroso da disponibilidade de quartos, evitar
 * **RD05** – O sistema deve guardar o histórico e o estado atual das reservas (data de criação, data de check-in, data de check-out, estado da reserva — pendente, confirmada, cancelada, concluída — e cliente associado).
 * **RD06** – O sistema deve guardar a informação financeira de cada reserva (montante total, data do pagamento, método de pagamento utilizado e estado do pagamento).
 * **RD07** – O sistema deve registar o nome do serviço adicional.
+* **RD08** –  O sistema deve registar os dados dos hotéis da cadeia (nome, morada, cidade, país, telefone).
 
 ---
 
@@ -72,3 +73,4 @@ Gestor do hotel: Acesso completo para consultar, alterar e analisar todos os dad
 * **Q04**:Em quantas reservas foi incluído cada serviço adicional? 
 * **Q05**: Qual é a taxa de ocupação dos quartos agrupada por tipo de quarto num determinado período?
 * **Q06**: Quais são as reservas pendentes de pagamento cuja data de check-in é no próprio dia?
+* **Q07**: Qual hotel da cadeia teve maior receita total no último mês?
