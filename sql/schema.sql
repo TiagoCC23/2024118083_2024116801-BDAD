@@ -1,3 +1,5 @@
+-- psql -U postgres -d hotel_db -f schema.sql
+
 BEGIN;
 
 ----------------------------------------------------------------------------
@@ -33,9 +35,25 @@ CREATE TABLE hotel (
     CONSTRAINT pk_hotel PRIMARY KEY (id_hotel),
     -- 'UNIQUE' evita cadastro duplicado do nome hotel
     CONSTRAINT uq_hotel_nome UNIQUE (nome_hotel),
-    -- 'BTRIM' remove espaços das pontas e garante que exista texto real preenchido
+    -- 'BTRIM' remove es    paços das pontas e garante que exista texto real preenchido
     CONSTRAINT chk_hotel_nome_nao_vazio CHECK (BTRIM(nome_hotel) != ''),
     CONSTRAINT chk_hotel_telemovel_nao_vazio CHECK (BTRIM(telemovel) != '')
+);
+
+--------------------
+--   TIPO_QUARTO
+--------------------
+CREATE TABLE tipo_quarto (
+    id_tipo_quarto INTEGER GENERATED ALWAYS AS IDENTITY,
+    nome_tipo VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    capacidade_maxima INTEGER NOT NULL,
+    preco_noite NUMERIC(10, 2) NOT NULL,
+
+    CONSTRAINT pk_tipo_quarto PRIMARY KEY (id_tipo_quarto),
+    CONSTRAINT uq_tipo_quarto_nome UNIQUE (nome_tipo),
+    CONSTRAINT chk_tipo_quarto_capacidade CHECK (capacidade_maxima >= 1),
+    CONSTRAINT chk_tipo_quarto_preco CHECK (preco_noite > 0) -- RN06
 );
 
 --------------------
@@ -66,22 +84,6 @@ CREATE TABLE quarto (
 );
 
 --------------------
---   TIPO_QUARTO
---------------------
-CREATE TABLE tipo_quarto (
-    id_tipo_quarto INTEGER GENERATED ALWAYS AS IDENTITY,
-    nome_tipo VARCHAR(100) NOT NULL,
-    descricao TEXT,
-    capacidade_maxima INTEGER NOT NULL,
-    preco_noite NUMERIC(10, 2) NOT NULL,
-
-    CONSTRAINT pk_tipo_quarto PRIMARY KEY (id_tipo_quarto),
-    CONSTRAINT uq_tipo_quarto_nome UNIQUE (nome_tipo),
-    CONSTRAINT chk_tipo_quarto_capacidade CHECK (capacidade_maxima >= 1),
-    CONSTRAINT chk_tipo_quarto_preco CHECK (preco_noite > 0) -- RN06
-);
-
---------------------
 --    SERVICO
 --------------------
 CREATE TABLE servico (
@@ -91,7 +93,7 @@ CREATE TABLE servico (
     preco_unitario NUMERIC(10, 2) NOT NULL CHECK (preco_unitario > 0),
 
     CONSTRAINT uq_servico_nome UNIQUE (nome_servico),
-    CONSTRAINT chk_servico_nome_nao_vazio CHECK (BTRIM(nome_servico) <> '')
+    CONSTRAINT chk_servico_nome_nao_vazio CHECK (BTRIM(nome_servico) <> '') -- se o nome não é vazio
 );
 
 --------------------
@@ -121,7 +123,7 @@ CREATE TABLE cliente (
     nome VARCHAR(150) NOT NULL,
     pais VARCHAR(100) NOT NULL,
     doc_identificacao VARCHAR(30) NOT NULL UNIQUE,
-    nif VARCHAR(20) NOT NULL UNIQUE CHECK (nif ~ '^[0-9]+$'),
+    nif VARCHAR(20) NOT NULL UNIQUE CHECK (nif ~ '^[A-Za-z0-9]+$'),
     email VARCHAR(100) NOT NULL UNIQUE CHECK (email LIKE '%@%'),
     telemovel VARCHAR(20) NOT NULL,
 
@@ -133,17 +135,17 @@ CREATE TABLE cliente (
 --------------------
 CREATE TABLE funcionario (
     id_funcionario INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_hotel INTEGER NOT NULL REFERENCES hotel(id_hotel) ON DELETE RESTRICT,
+    id_hotel INTEGER REFERENCES hotel(id_hotel) ON DELETE RESTRICT,
 
     nome VARCHAR(150) NOT NULL,
     cargo VARCHAR(100) NOT NULL,
     data_contratacao DATE NOT NULL,
-    nif VARCHAR(20) NOT NULL UNIQUE CHECK (nif ~ '^[0-9]+$'),
+    nif VARCHAR(20) NOT NULL UNIQUE CHECK (nif ~ '^[A-Za-z0-9]+$'),
     email VARCHAR(100) NOT NULL UNIQUE CHECK (email LIKE '%@%'),
     telemovel VARCHAR(20) NOT NULL,
 
     CONSTRAINT chk_funcionario_nome_nao_vazio CHECK (BTRIM(nome) <> ''),
-    CONSTRAINT chk_funcionario_telemovel_nao_vazio CHECK (BTRIM(telemovel) <> '')
+    CONSTRAINT chk_funcionario_telemovel_nao_vazio CHECK (BTRIM(telemovel) <> ''),
     CONSTRAINT chk_cargo_hotel CHECK (
         (Cargo = 'gestor_cadeia' AND ID_Hotel IS NULL) OR
         (Cargo IN ('rececionista', 'gestor_hotel') AND ID_Hotel IS NOT NULL)
@@ -157,28 +159,27 @@ CREATE TABLE funcionario (
 CREATE TABLE reserva (
     id_reserva INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_cliente INTEGER NOT NULL REFERENCES cliente(id_cliente) ON DELETE RESTRICT,
-    id_funcionario INTEGER NOT NULL REFERENCES funcionario(id_funcionario) ON DELETE SET NULL,
-    num_quarto INTEGER NOT NULL REFERENCES quarto(num_quarto) ON DELETE CASCADE,
+    id_funcionario INTEGER REFERENCES funcionario(id_funcionario) ON DELETE SET NULL,
 
-    estado_reserva  VARCHAR(20) NOT NULL DEFAULT 'pendente' 
-    CHECK (Estado_Reserva IN ('pendente', 'confirmada', 'cancelada', 'concluida')),
-    num_hospedes INTEGER NOT NULL CHECK (num_hospedes > 0 AND num_hospedes <= capacidade_maxima),
-    data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_DATE,
+    estado_reserva VARCHAR(20) NOT NULL DEFAULT 'pendente'
+        CHECK (estado_reserva IN ('pendente', 'confirmada', 'cancelada', 'concluida')),
+    num_hospedes INTEGER NOT NULL CHECK (num_hospedes > 0),
+    data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_checkin DATE NOT NULL,
     data_checkout DATE NOT NULL,
 
-    CONSTRAINT chk_datas_reserva CHECK (data_checkin < data_checkout),
+    CONSTRAINT chk_datas_reserva CHECK (data_checkin < data_checkout)
+);
 
-)
 
 --------------------
 -- RESERVA_QUARTO
 --------------------
 CREATE TABLE reserva_quarto (
     id_reserva INTEGER NOT NULL REFERENCES reserva(id_reserva) ON DELETE CASCADE,
-    num_quarto INTEGER NOT NULL REFERENCES quarto(num_quarto) ON DELETE CASCADE,
+    id_quarto INTEGER NOT NULL REFERENCES quarto(id_quarto) ON DELETE RESTRICT,
 
-    PRIMARY KEY (id_reserva, num_quarto)
+    PRIMARY KEY (id_reserva, id_quarto)
 );
 
 --------------------
@@ -192,7 +193,7 @@ CREATE TABLE reserva_servico (
     quantidade INTEGER NOT NULL CHECK (quantidade >= 1),
     preco_aplicado DECIMAL(10, 2) NOT NULL CHECK (preco_aplicado > 0),
 
-    PRIMARY KEY (id_reserva, id_servico)
+    PRIMARY KEY (id_reserva, id_servico, data_servico)
 );
 
 --------------------
