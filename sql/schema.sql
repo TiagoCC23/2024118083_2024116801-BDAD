@@ -1,21 +1,25 @@
--- psql -U postgres -d hotel_db -f schema.sql
+-- psql -U postgres -d postgres -f schema.sql
 
-BEGIN;
-
+\encoding UTF8
 ----------------------------------------------------------------------------
 --    Limpeza para garantir recriação previsível da base de dados
 ----------------------------------------------------------------------------
-DROP TABLE IF EXISTS pagamento CASCADE;
-DROP TABLE IF EXISTS reserva_servico CASCADE;
-DROP TABLE IF EXISTS reserva_quarto CASCADE;
-DROP TABLE IF EXISTS reserva CASCADE;
-DROP TABLE IF EXISTS funcionario CASCADE;
-DROP TABLE IF EXISTS cliente CASCADE;
-DROP TABLE IF EXISTS hotel_servico CASCADE;
-DROP TABLE IF EXISTS servico CASCADE;
-DROP TABLE IF EXISTS quarto CASCADE;
-DROP TABLE IF EXISTS tipo_quarto CASCADE;
-DROP TABLE IF EXISTS hotel CASCADE;
+DROP DATABASE IF EXISTS hotel_db;
+
+CREATE DATABASE hotel_db
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'Portuguese_Portugal.utf8'  -- Windows
+    LC_CTYPE = 'Portuguese_Portugal.utf8'    -- Windows
+--  LC_COLLATE = 'pt_PT.UTF-8'               -- macOS
+--  LC_CTYPE = 'pt_PT.UTF-8'                 -- macOS
+    TEMPLATE = template0;
+
+\c hotel_db
+\encoding UTF8
+
+BEGIN;
 
 ------------------
 --    HOTEL
