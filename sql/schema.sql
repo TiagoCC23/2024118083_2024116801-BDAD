@@ -97,7 +97,7 @@ CREATE TABLE servico (
     preco_unitario NUMERIC(10, 2) NOT NULL CHECK (preco_unitario > 0),
 
     CONSTRAINT uq_servico_nome UNIQUE (nome_servico),
-    CONSTRAINT chk_servico_nome_nao_vazio CHECK (BTRIM(nome_servico) <> '')
+    CONSTRAINT chk_servico_nome_nao_vazio CHECK (BTRIM(nome_servico) <> '') -- se o nome não é vazio
 );
 
 --------------------

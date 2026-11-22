@@ -44,6 +44,9 @@ O objetivo é garantir o controle rigoroso da disponibilidade de quartos, evitar
 * **Reserva**: Registo formal de uma intenção de ocupação de um quarto por um cliente num determinado intervalo de datas (check-in e check-out).
 * **Pagamento**: Registo da transação financeira referente ao valor total de uma reserva ou serviço.
 * **Serviço**: Prestação adicional disponibilizada pelo hotel para o cliente durante a sua estadia.
+* **Funcionário**: Colaborador do hotel responsável por processar reservas, check-in/check-out e registar serviços. 
+* **Hotel**: Unidade física da cadeia hoteleira, com os seus próprios quartos e funcionários. 
+
 
 ---
 
@@ -58,10 +61,25 @@ O objetivo é garantir o controle rigoroso da disponibilidade de quartos, evitar
 
 ---
 
+## Regras de negócio
+* **RN01** – Cada reserva tem de estar compulsoriamente associada a um único cliente registrado.
+* **RN02** – A data de check-out deve ser estritamente posterior à data de check-in.
+* **RN03** – Um mesmo quarto não pode ter mais do que uma reserva pendente, confirmada ou concluída para o mesmo intervalo de datas (as reservas canceladas não ocupam o quarto). 
+* **RN04** – O número de hóspedes associado a uma reserva não pode exceder a capacidade máxima definida para a tipologia do quarto selecionado.
+* **RN05** – O NIF e o documento de identificação do cliente devem ser únicos no sistema, impedindo registos duplicados.
+* **RN06** – Todos os valores monetários devem ser estritamente superiores a zero.
+* **RN07** – Cada transação/registo de pagamento utiliza um único método de pagamento.
+* **RN08** – O campo ID_Hotel em Funcionario é obrigatório para os cargos 'rececionista' e 'gestor_hotel', e deve ser nulo para 'gestor_cadeia'.
+
+---
+
 ## Atores e necessidades de acesso
-Cliente: Consultar a disponibilidade de quartos, criar reservas próprias, consultar o histórico do seu perfil/reservas e efetuar pagamentos.
-Recepcionista/Funcionário: Consultar e gerir a disponibilidade dos quartos, efetuar check-in/check-out, registar/alterar reservas, registar serviços adicionais e emitir/consultar pagamentos.
-Gestor do hotel: Acesso completo para consultar, alterar e analisar todos os dados do sistema (quartos, clientes, reservas, faturação e relatórios de ocupação/serviços).
+* **Recepcionista**: Consultar e gerir a disponibilidade dos quartos do seu hotel, efetuar check-in/check-out, registar/alterar reservas, registar serviços adicionais e emitir/consultar pagamentos — restrito ao hotel a que está afeto.
+* **Cliente**: Consultar a disponibilidade de quartos, criar reservas próprias, consultar o histórico do seu perfil/reservas e efetuar pagamentos.
+* **Recepcionista/Funcionário**: Consultar e gerir a disponibilidade dos quartos, efetuar check-in/check-out, registar/alterar reservas, registar serviços adicionais e emitir/consultar pagamentos.
+* **Gestor de Hotel**: Acesso completo aos dados do seu hotel (quartos, funcionários, reservas, faturação e relatórios de ocupação/serviços) — restrito ao hotel a que está afeto.
+* **Gestor de Cadeia**: Acesso completo a todos os hotéis da cadeia — consulta e análise agregada de ocupação, faturação e desempenho entre hotéis, e gestão de dados de qualquer hotel.
+
 
 ---
 
@@ -69,6 +87,6 @@ Gestor do hotel: Acesso completo para consultar, alterar e analisar todos os dad
 * **Q01**: Quais são os quartos disponíveis (não reservados) para um determinado intervalo de datas?
 * **Q02**: Qual é o histórico de reservas efetuadas por um determinado cliente?
 * **Q03**: Qual é o valor total de faturação acumulado por método de pagamento num determinado mês?
-* **Q04**:Em quantas reservas foi incluído cada serviço adicional? 
+* **Q04**: Em quantas reservas foi incluído cada serviço adicional? 
 * **Q05**: Qual é a taxa de ocupação dos quartos agrupada por tipo de quarto num determinado período?
 * **Q06**: Quais são as reservas pendentes de pagamento cuja data de check-in é no próprio dia?
