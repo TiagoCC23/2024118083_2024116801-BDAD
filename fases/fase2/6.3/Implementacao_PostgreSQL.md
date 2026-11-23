@@ -29,5 +29,6 @@ Para garantir que a base de dados possa ser recriada de forma previsível e ató
 ## 4. Como executar
 ```
 createdb hotel_db
+chcp 65001
 psql -U postgres -d hotel_db -f sql/schema.sql
 ```
